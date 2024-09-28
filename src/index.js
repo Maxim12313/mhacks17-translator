@@ -1,5 +1,6 @@
 const { app, BrowserWindow, globalShortcut, ipcMain } = require("electron");
 const path = require("path");
+const deepl = require("deepl-node");
 
 let mainWindow;
 let popupWindow;
@@ -86,4 +87,18 @@ ipcMain.on("submit-input", (event, value) => {
 
 ipcMain.on("close-popup", () => {
   if (popupWindow) popupWindow.close();
+});
+
+const authkey = "9e6ec4bd-b318-4768-b361-0784175a62d4:fx";
+const translator = new deepl.Translator(authkey);
+
+ipcMain.handle("translate-to", async (event, { input, language }) => {
+  try {
+    const res = await translator.translateText(input, null, language);
+    console.log("from handler: ", res);
+    return res;
+  } catch (error) {
+    console.error("from handler: ", error);
+    return error;
+  }
 });
