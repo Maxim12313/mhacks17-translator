@@ -29,6 +29,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "canvas": "^2.11.2",
     "deepl-node": "^1.14.0",
     "electron-squirrel-startup": "^1.0.1"
   }

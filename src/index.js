@@ -8,11 +8,67 @@ const {
 const path = require("path");
 const deepl = require("deepl-node");
 const { clipboard } = require("electron");
-
 const toggleBind = "CommandOrControl+I";
+const { create } = require("domain");
 
 let mainWindow;
 let popupWindow;
+let avatarWindow;
+
+function createAvatarWindow() {
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+
+  avatarWindow = new BrowserWindow({
+    width: 200,
+    height: 200,
+    transparent: true,
+    frame: false,
+    skipTaskbar: false,
+    alwaysOnTop: true,
+    resizable: false,
+    hasShadow: false,
+    webPreferences: {
+      preload: path.join(__dirname, "preload.js"),
+      nodeIntegration: true,
+      contextIsolation: false,
+    },
+  });
+
+  avatarWindow.setIgnoreMouseEvents(true);
+  avatarWindow.setMovable(true);
+
+  // Set the overlay position to bottom-right corner
+  avatarWindow.setBounds({
+    x: width - 220, // Adjusted for the width of the avatar
+    y: height - 220, // Adjusted for the height of the avatar
+    width: 200,
+    height: 200,
+  });
+
+  avatarWindow.loadFile("src/avatar.html");
+
+  avatarWindow.on("closed", () => {
+    avatarWindow = null;
+  });
+}
+
+function togglePopup() {
+  if (popupWindow) {
+    // Close both windows if the popup is already open
+    popupWindow.close();
+    avatarWindow.close(); // Close avatar if popup is closed
+    popupWindow = null;
+    avatarWindow = null;
+  } else {
+    // Create both windows if they are not open
+    createAvatarWindow();
+    createPopup();
+
+    // Ensure both windows stay on top
+    avatarWindow.setAlwaysOnTop(true);
+    popupWindow.setAlwaysOnTop(true);
+  }
+}
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -36,15 +92,6 @@ function testMaxim() {
   });
   mainWindow.webContents.openDevTools();
   mainWindow.loadFile(path.join(__dirname, "maxim.html"));
-}
-
-function togglePopup() {
-  if (popupWindow) {
-    popupWindow.close();
-    popupWindow = null;
-  } else {
-    createPopup();
-  }
 }
 
 function createPopup() {
@@ -77,7 +124,7 @@ function createPopup() {
   });
 
   popupWindow.on("blur", () => {
-    popupWindow.close();
+    // popupWindow.close();
   });
 
   // Prevent the window from being moved
@@ -90,9 +137,11 @@ app.whenReady().then(() => {
 
   globalShortcut.register(toggleBind, togglePopup);
 
-  app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
-  });
+  // app.on("activate", () => {
+  //   if (BrowserWindow.getAllWindows().length === 0) {
+  //     createWindow();
+  //   }
+  // });
 });
 
 app.on("window-all-closed", () => {
@@ -110,6 +159,7 @@ ipcMain.on("submit-input", (event, value) => {
 
 ipcMain.on("close-popup", () => {
   if (popupWindow) popupWindow.close();
+  if (avatarWindow) avatarWindow.close();
 });
 
 const authkey = "9e6ec4bd-b318-4768-b361-0784175a62d4:fx";
