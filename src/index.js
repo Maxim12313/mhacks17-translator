@@ -1,5 +1,5 @@
-const { app, BrowserWindow, globalShortcut, ipcMain } = require('electron');
-const path = require('path');
+const { app, BrowserWindow, globalShortcut, ipcMain } = require("electron");
+const path = require("path");
 
 let mainWindow;
 let popupWindow;
@@ -9,11 +9,23 @@ function createWindow() {
     width: 800,
     height: 600,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, "preload.js"),
     },
   });
 
-  mainWindow.loadFile(path.join(__dirname, 'index.html'));
+  mainWindow.loadFile(path.join(__dirname, "index.html"));
+}
+
+function testMaxim() {
+  mainWindow = new BrowserWindow({
+    width: 800,
+    height: 600,
+    webPreferences: {
+      preload: path.join(__dirname, "maxim-preload.js"),
+    },
+  });
+  mainWindow.webContents.openDevTools();
+  mainWindow.loadFile(path.join(__dirname, "maxim.html"));
 }
 
 function togglePopup() {
@@ -34,36 +46,38 @@ function createPopup() {
     frame: true,
     movable: true,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, "preload.js"),
     },
   });
 
-  popupWindow.loadFile(path.join(__dirname, 'popup.html'));
+  popupWindow.loadFile(path.join(__dirname, "popup.html"));
 
-  popupWindow.on('closed', () => {
+  popupWindow.on("closed", () => {
     popupWindow = null;
   });
 }
 
 app.whenReady().then(() => {
   createWindow();
+  testMaxim();
 
-  globalShortcut.register('CommandOrControl+I', togglePopup);
+  globalShortcut.register("CommandOrControl+I", togglePopup);
 
-  app.on('activate', () => {
+  app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
 });
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") app.quit();
 });
 
-app.on('will-quit', () => {
+app.on("will-quit", () => {
   globalShortcut.unregisterAll();
 });
 
-ipcMain.on('submit-input', (event, value) => {
-  mainWindow.webContents.send('input-received', value);
+ipcMain.on("submit-input", (event, value) => {
+  mainWindow.webContents.send("input-received", value);
   if (popupWindow) popupWindow.close();
 });
+

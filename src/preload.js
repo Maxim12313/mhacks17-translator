@@ -1,6 +1,7 @@
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer } = require("electron");
 
-contextBridge.exposeInMainWorld('electronAPI', {
-  submitInput: (value) => ipcRenderer.send('submit-input', value),
-  onInputReceived: (callback) => ipcRenderer.on('input-received', callback)
+contextBridge.exposeInMainWorld("electronAPI", {
+  submitInput: (value) => ipcRenderer.send("submit-input", value),
+  onInputReceived: (callback) => ipcRenderer.on("input-received", callback),
 });
+
