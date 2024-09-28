@@ -95,10 +95,8 @@ const translator = new deepl.Translator(authkey);
 ipcMain.handle("translate-to", async (event, { input, language }) => {
   try {
     const res = await translator.translateText(input, null, language);
-    console.log("from handler: ", res);
     return res;
   } catch (error) {
-    console.error("from handler: ", error);
     return error;
   }
 });
