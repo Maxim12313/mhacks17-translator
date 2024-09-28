@@ -1,6 +1,9 @@
 const { app, BrowserWindow, globalShortcut, ipcMain } = require("electron");
 const path = require("path");
 const deepl = require("deepl-node");
+const { clipboard } = require("electron");
+
+const toggleBind = "CommandOrControl+I";
 
 let mainWindow;
 let popupWindow;
@@ -65,7 +68,7 @@ app.whenReady().then(() => {
   createWindow();
   testMaxim();
 
-  globalShortcut.register("CommandOrControl+I", togglePopup);
+  globalShortcut.register(toggleBind, togglePopup);
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
