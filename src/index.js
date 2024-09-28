@@ -93,6 +93,12 @@ const authkey = "9e6ec4bd-b318-4768-b361-0784175a62d4:fx";
 const translator = new deepl.Translator(authkey);
 
 ipcMain.handle("translate-to", async (event, { input, language }) => {
+  const usage = await translator.getUsage();
+  if (usage.anyLimitReached()) {
+    return {
+      error: "translation limit",
+    };
+  }
   try {
     const res = await translator.translateText(input, null, language);
     return res;
