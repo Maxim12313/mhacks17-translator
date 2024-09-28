@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, globalShortcut, ipcMain } = require('electron');
 const path = require('path');
 
 let mainWindow;
@@ -14,7 +14,15 @@ function createWindow() {
   });
 
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
-  mainWindow.webContents.openDevTools();
+}
+
+function togglePopup() {
+  if (popupWindow) {
+    popupWindow.close();
+    popupWindow = null;
+  } else {
+    createPopup();
+  }
 }
 
 function createPopup() {
@@ -31,10 +39,16 @@ function createPopup() {
   });
 
   popupWindow.loadFile(path.join(__dirname, 'popup.html'));
+
+  popupWindow.on('closed', () => {
+    popupWindow = null;
+  });
 }
 
 app.whenReady().then(() => {
   createWindow();
+
+  globalShortcut.register('CommandOrControl+I', togglePopup);
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
@@ -45,12 +59,8 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
 
-ipcMain.on('open-popup', () => {
-  createPopup();
-});
-
-ipcMain.on('close-popup', () => {
-  if (popupWindow) popupWindow.close();
+app.on('will-quit', () => {
+  globalShortcut.unregisterAll();
 });
 
 ipcMain.on('submit-input', (event, value) => {
