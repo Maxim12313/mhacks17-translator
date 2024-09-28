@@ -18,7 +18,7 @@ function createAvatarWindow() {
     transparent: true,
     frame: false,
     skipTaskbar: false,
-    alwaysOnTop: false,
+    alwaysOnTop: true,
     resizable: false,
     hasShadow: false,
     webPreferences: {
@@ -47,14 +47,20 @@ function createAvatarWindow() {
 }
 
 function togglePopup() {
-  if (popupWindow && avatarWindow) {
-    avatarWindow.close();
+  if (popupWindow) {
+    // Close both windows if the popup is already open
     popupWindow.close();
-    avatarWindow = null;
+    avatarWindow.close(); // Close avatar if popup is closed
     popupWindow = null;
+    avatarWindow = null;
   } else {
+    // Create both windows if they are not open
     createAvatarWindow();
     createPopup();
+    
+    // Ensure both windows stay on top
+    avatarWindow.setAlwaysOnTop(true);
+    popupWindow.setAlwaysOnTop(true);
   }
 }
 
@@ -111,7 +117,7 @@ function createPopup() {
   });
 
   popupWindow.on('blur', () => {
-    popupWindow.close();
+    // popupWindow.close();
   });
 
   // Prevent the window from being moved
