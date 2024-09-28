@@ -3,11 +3,20 @@
   <head>
     <title>Maxim Test</title>
     <link rel="stylesheet" href="index.css" />
+    <style>
+      .hide {
+        visibility: hidden;
+      }
+    </style>
   </head>
   <body>
     <h1>Maxim Test</h1>
     <input type="text" id="popupInput" placeholder="Type your message..." />
     <p>Translated:<span id="translated"></span></p>
+    <div>
+      <button id="record">record</button>
+      <button id="stop" class="hide">stop</button>
+    </div>
     <script src="maxim-renderer.js"></script>
   </body>
 </html>

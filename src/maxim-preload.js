@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer } = require("electron");
+const { contextBridge, ipcRenderer, Menu } = require("electron");
 
 contextBridge.exposeInMainWorld("maxim", {
   log: () => console.log("hello there"),

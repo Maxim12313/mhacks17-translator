@@ -1,4 +1,10 @@
-const { app, BrowserWindow, globalShortcut, ipcMain, screen } = require('electron');
+const {
+  app,
+  BrowserWindow,
+  globalShortcut,
+  ipcMain,
+  screen,
+} = require("electron");
 const path = require("path");
 const deepl = require("deepl-node");
 const { clipboard } = require("electron");
@@ -42,7 +48,8 @@ function togglePopup() {
 }
 
 function createPopup() {
-  const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize;
+  const { width: screenWidth, height: screenHeight } =
+    screen.getPrimaryDisplay().workAreaSize;
   const popupWidth = 600;
   const popupHeight = 60;
 
@@ -59,17 +66,17 @@ function createPopup() {
     maximizable: false,
     fullscreenable: false,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, "preload.js"),
     },
   });
 
-  popupWindow.loadFile(path.join(__dirname, 'popup.html'));
+  popupWindow.loadFile(path.join(__dirname, "popup.html"));
 
-  popupWindow.on('closed', () => {
+  popupWindow.on("closed", () => {
     popupWindow = null;
   });
 
-  popupWindow.on('blur', () => {
+  popupWindow.on("blur", () => {
     popupWindow.close();
   });
 
@@ -122,3 +129,6 @@ ipcMain.handle("translate-to", async (event, { input, language }) => {
     return error;
   }
 });
+
+// const { desktopCapture } = require("electron");
+// ipcMain.handle("")
