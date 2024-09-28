@@ -1,7 +1,6 @@
-const { app, BrowserWindow, globalShortcut, ipcMain, screen } = require('electron');
+const { app, BrowserWindow, globalShortcut, ipcMain, screen, clipbord } = require('electron');
 const path = require("path");
 const deepl = require("deepl-node");
-const { clipboard } = require("electron");
 const toggleBind = "CommandOrControl+I";
 const { create } = require("domain");
 
@@ -123,14 +122,8 @@ app.whenReady().then(() => {
   createWindow();
   testMaxim();
 
-  globalShortcut.register(toggleBind, togglePopup);
-
-  // app.on("activate", () => {
-  //   if (BrowserWindow.getAllWindows().length === 0) {
-  //     createWindow();
-  //   }
-  // });
-});
+  globalShortcut.register('CommandOrControl+I', togglePopup);
+}); 
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
