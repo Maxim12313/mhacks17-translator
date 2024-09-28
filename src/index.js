@@ -1,4 +1,4 @@
-const { app, BrowserWindow, globalShortcut, ipcMain } = require("electron");
+const { app, BrowserWindow, globalShortcut, ipcMain, screen } = require('electron');
 const path = require("path");
 const deepl = require("deepl-node");
 
@@ -39,26 +39,39 @@ function togglePopup() {
 }
 
 function createPopup() {
+  const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize;
+  const popupWidth = 600;
+  const popupHeight = 60;
+
   popupWindow = new BrowserWindow({
-    width: 600,
-    height: 60,
+    width: popupWidth,
+    height: popupHeight,
+    x: (screenWidth - popupWidth) / 2,
+    y: screenHeight - popupHeight - 20, // 20px padding from the bottom
     frame: false,
     transparent: true,
     alwaysOnTop: true,
+    resizable: false,
+    minimizable: false,
+    maximizable: false,
+    fullscreenable: false,
     webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
+      preload: path.join(__dirname, 'preload.js'),
     },
   });
 
-  popupWindow.loadFile(path.join(__dirname, "popup.html"));
+  popupWindow.loadFile(path.join(__dirname, 'popup.html'));
 
-  popupWindow.on("closed", () => {
+  popupWindow.on('closed', () => {
     popupWindow = null;
   });
 
-  popupWindow.on("blur", () => {
+  popupWindow.on('blur', () => {
     popupWindow.close();
   });
+
+  // Prevent the window from being moved
+  popupWindow.setMovable(false);
 }
 
 app.whenReady().then(() => {
