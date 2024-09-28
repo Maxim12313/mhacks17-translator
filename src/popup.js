@@ -6,8 +6,8 @@ popupInput.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
         const inputValue = popupInput.value.trim();
         if (inputValue) {
+            fetchAudio(inputValue);
             window.electronAPI.submitInput(inputValue);
-            fetchAudio(path);
             popupInput.value = '';
         }
     } else if (event.key === 'Escape') {

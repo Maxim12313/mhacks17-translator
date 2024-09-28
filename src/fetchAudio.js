@@ -17,6 +17,8 @@ async function fetchAudio(text) {
       }),
     });
 
+    console.log('CARTESIAN RAN');
+
     const buffer = await response.buffer();
     fs.writeFileSync('sonic.wav', buffer);
 
