@@ -30,6 +30,7 @@ function createAvatarWindow() {
   });
 
   avatarWindow.setIgnoreMouseEvents(true);
+  avatarWindow.setMovable(true);
 
   // Set the overlay position to bottom-right corner
   avatarWindow.setBounds({
@@ -71,10 +72,13 @@ function testMaxim() {
 }
 
 function togglePopup() {
-  if (popupWindow) {
+  if (popupWindow && avatarWindow) {
+    avatarWindow.close();
     popupWindow.close();
+    avatarWindow = null;
     popupWindow = null;
   } else {
+    createAvatarWindow();
     createPopup();
   }
 }
@@ -118,15 +122,14 @@ function createPopup() {
 app.whenReady().then(() => {
   createWindow();
   testMaxim();
-  createAvatarWindow();
 
   globalShortcut.register(toggleBind, togglePopup);
 
-  app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
-    }
-  });
+  // app.on("activate", () => {
+  //   if (BrowserWindow.getAllWindows().length === 0) {
+  //     createWindow();
+  //   }
+  // });
 });
 
 app.on("window-all-closed", () => {
@@ -144,6 +147,7 @@ ipcMain.on("submit-input", (event, value) => {
 
 ipcMain.on("close-popup", () => {
   if (popupWindow) popupWindow.close();
+  if (avatarWindow) avatarWindow.close();
 });
 
 const authkey = "9e6ec4bd-b318-4768-b361-0784175a62d4:fx";
