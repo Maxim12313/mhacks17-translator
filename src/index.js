@@ -9,7 +9,6 @@ let popupWindow;
 let avatarWindow;
 
 function createAvatarWindow() {
-
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
 
   avatarWindow = new BrowserWindow({
@@ -18,7 +17,7 @@ function createAvatarWindow() {
     transparent: true,
     frame: false,
     skipTaskbar: false,
-    alwaysOnTop: true,
+    alwaysOnTop: false,
     resizable: false,
     hasShadow: false,
     webPreferences: {
@@ -33,8 +32,8 @@ function createAvatarWindow() {
 
   // Set the overlay position to bottom-right corner
   avatarWindow.setBounds({
-    x: width - 400, // Right edge position (400 is the width of the overlay)
-    y: height - 300, // Bottom edge position (300 is the height of the overlay)
+    x: width - 220, // Adjusted for the width of the avatar
+    y: height - 220, // Adjusted for the height of the avatar
     width: 200,
     height: 200,
   });
@@ -44,6 +43,18 @@ function createAvatarWindow() {
   avatarWindow.on('closed', () => {
     avatarWindow = null;
   });
+}
+
+function togglePopup() {
+  if (popupWindow && avatarWindow) {
+    avatarWindow.close();
+    popupWindow.close();
+    avatarWindow = null;
+    popupWindow = null;
+  } else {
+    createAvatarWindow();
+    createPopup();
+  }
 }
 
 function createWindow() {
@@ -68,18 +79,6 @@ function testMaxim() {
   });
   mainWindow.webContents.openDevTools();
   mainWindow.loadFile(path.join(__dirname, "maxim.html"));
-}
-
-function togglePopup() {
-  if (popupWindow && avatarWindow) {
-    avatarWindow.close();
-    popupWindow.close();
-    avatarWindow = null;
-    popupWindow = null;
-  } else {
-    createAvatarWindow();
-    createPopup();
-  }
 }
 
 function createPopup() {
