@@ -27,12 +27,11 @@ function togglePopup() {
 
 function createPopup() {
   popupWindow = new BrowserWindow({
-    width: 300,
-    height: 200,
-    parent: mainWindow,
-    modal: false,
-    frame: true,
-    movable: true,
+    width: 600,
+    height: 60,
+    frame: false,
+    transparent: true,
+    alwaysOnTop: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
     },
@@ -42,6 +41,10 @@ function createPopup() {
 
   popupWindow.on('closed', () => {
     popupWindow = null;
+  });
+
+  popupWindow.on('blur', () => {
+    popupWindow.close();
   });
 }
 
@@ -65,5 +68,9 @@ app.on('will-quit', () => {
 
 ipcMain.on('submit-input', (event, value) => {
   mainWindow.webContents.send('input-received', value);
+  if (popupWindow) popupWindow.close();
+});
+
+ipcMain.on('close-popup', () => {
   if (popupWindow) popupWindow.close();
 });
