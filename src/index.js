@@ -101,6 +101,9 @@ function togglePopup() {
     if (translationWindow) {
       translationWindow.close();
     }
+    if (settingsWindow) {
+      settingsWindow.close();
+    }
 
     translationWindow = null;
     popupWindow = null;
