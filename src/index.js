@@ -156,36 +156,35 @@ app.on("will-quit", () => {
 });
 
 ipcMain.on("submit-input", async (event, value) => {
-  const translatedValue = await translator.translateText(value, null, 'fr'); // Translate to French
+  const translatedValue = await translator.translateText(value, null, "fr"); // Translate to French
   mainWindow.webContents.send("input-received", translatedValue);
   createTranslationWindow(translatedValue); // Create a new window to show the translation
 });
 
 function createTranslationWindow(translatedText) {
   translationWindow = new BrowserWindow({
-      width: 400,
-      height: 300,
-      frame: false,
-      x: 1000,
-      y: 500,
-      transparent: true,      
-      minimizable: false,
-      maximizable: false,
-      fullscreenable: false,      
-      webPreferences: {
-          preload: path.join(__dirname, 'translation-preload.js'),
-          contextIsolation: true,
-          enableRemoteModule: false,
-      },
+    width: 400,
+    height: 300,
+    frame: false,
+    x: 1000,
+    y: 500,
+    transparent: true,
+    minimizable: false,
+    maximizable: false,
+    fullscreenable: false,
+    webPreferences: {
+      preload: path.join(__dirname, "translation-preload.js"),
+      contextIsolation: true,
+      enableRemoteModule: false,
+    },
   });
 
   // Send the translated text to the translation window
-  translationWindow.webContents.on('did-finish-load', () => {
-    translationWindow.webContents.send('send-translation', translatedText.text);
+  translationWindow.webContents.on("did-finish-load", () => {
+    translationWindow.webContents.send("send-translation", translatedText.text);
   });
 
-  translationWindow.loadFile(path.join(__dirname, 'translation.html'));
-
+  translationWindow.loadFile(path.join(__dirname, "translation.html"));
 }
 
 ipcMain.on("close-popup", () => {

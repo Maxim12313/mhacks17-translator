@@ -77,6 +77,8 @@ function recordHandler() {
       const audioURL = window.URL.createObjectURL(blob);
       audioElement.src = audioURL;
       const base64 = await convertBase64(blob);
+
+      // res is the transcription
       const res = await window.maxim.transcribe(base64);
       transcribeElement.innerText = res;
     };
