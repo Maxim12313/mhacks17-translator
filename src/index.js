@@ -162,7 +162,14 @@ app.on("will-quit", () => {
 ipcMain.on("submit-input", async (event, value) => {
   const translatedValue = await translator.translateText(value, null, "fr"); // Translate to French
   mainWindow.webContents.send("input-received", translatedValue);
+  if (translationWindow){
+    translationWindow.close();  
+  }
   createTranslationWindow(translatedValue); // Create a new window to show the translation
+  // Focus on the popup window after submitting input and showing the translation window
+  if (popupWindow) {
+    popupWindow.focus();
+  }
 });
 
 function createTranslationWindow(translatedText) {
