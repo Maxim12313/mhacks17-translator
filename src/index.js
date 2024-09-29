@@ -12,12 +12,13 @@ const toggleBind = "CommandOrControl+I";
 const { create } = require("domain");
 const fetchAudio = require("./fetchAudio");
 const { getWaveBlob } = require("webm-to-wav-converter");
+const { clipboard } = require("electron");
 
 let mainWindow;
 let popupWindow;
 let avatarWindow;
 let settingsWindow;
-let selectedLanguage = 'en-US'; //default language
+let selectedLanguage = "en-US"; //default language
 
 function createSettingsWindow() {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
@@ -231,7 +232,15 @@ ipcMain.on("submit-input", async (event, value) => {
   if (translationWindow) {
     translationWindow.close();
   }
-  createTranslationWindow(value); // Create a new window to show the translation
+
+  const translatedText = await translator.translateText(
+    value,
+    null,
+    selectedLanguage,
+  ); // Translate to French
+
+  clipboard.writeText(translatedText.text);
+  createTranslationWindow(translatedText.text); // Create a new window to show the translation
   // Focus on the popup window after submitting input and showing the translation window
   if (popupWindow) {
     popupWindow.focus();
@@ -256,18 +265,15 @@ async function createTranslationWindow(translatedText) {
     },
   });
 
-  const translatedOutput = await translator.translateText(
-    translatedText,
-    null,
-    selectedLanguage,
-  ); // Translate to French
+  // const translatedOutput = await translator.translateText(
+  //   translatedText,
+  //   null,
+  //   selectedLanguage,
+  // ); // Translate to French
 
   // Send the translated text to the translation window
   translationWindow.webContents.on("did-finish-load", async () => {
-    translationWindow.webContents.send(
-      "send-translation",
-      translatedOutput.text,
-    );
+    translationWindow.webContents.send("send-translation", translatedText);
   });
 
   translationWindow.loadFile(path.join(__dirname, "translation.html"));
