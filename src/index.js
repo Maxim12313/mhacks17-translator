@@ -84,6 +84,7 @@ function createTranscriptionWindow() {
   transcriptionWindow = new BrowserWindow({
     width: 800,
     height: 200,
+    // height: 600,
     transparent: true,
     frame: false,
     skipTaskbar: false,
@@ -91,9 +92,10 @@ function createTranscriptionWindow() {
     resizable: false,
     hasShadow: false,
     webPreferences: {
-      preload: path.join(__dirname, "maxim-preload.js"),
+      preload: path.join(__dirname, "translation-preload.js"),
     },
   });
+  transcriptionWindow.hide();
   transcriptionWindow.loadFile(path.join(__dirname, "transcription.html"));
 }
 
@@ -163,16 +165,20 @@ function createPopup() {
   popupWindow.setMovable(false);
 }
 
+function toggleTranscriptionWindow() {
+  if (transcriptionWindow.isVisible()) {
+    transcriptionWindow.hide();
+    transcriptionWindow.webContents.send("end-stream");
+  } else {
+    transcriptionWindow.show();
+    transcriptionWindow.webContents.send("start-stream");
+  }
+}
+
 app.whenReady().then(() => {
   createMainWindow();
   createTranscriptionWindow();
-  globalShortcut.register("CommandOrControl+U", () => {
-    if (transcriptionWindow.isVisible()) {
-      transcriptionWindow.hide();
-    } else {
-      transcriptionWindow.show();
-    }
-  });
+  globalShortcut.register("CommandOrControl+U", toggleTranscriptionWindow);
   globalShortcut.register("CommandOrControl+I", togglePopup);
 });
 
@@ -343,7 +349,6 @@ function handleStreamTranscription() {
   });
 
   ipcMain.on("stop-streaming", () => {
-    console.log("stopped");
     if (recognizeStream) {
       recognizeStream.end();
     }
