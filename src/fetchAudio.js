@@ -12,7 +12,7 @@ async function fetchAudio(transcript) {
     },
     body: JSON.stringify({
       transcript: transcript,
-      model_id: 'sonic-english',
+      model_id: 'sonic-multilingual',
       voice: {
         mode: 'id',
         id: 'a0e99841-438c-4a64-b679-ae501e7d6091'
