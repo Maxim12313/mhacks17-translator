@@ -1,17 +1,117 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Main Window</title>
-    <link rel="stylesheet" href="index.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PolyGlide - Your Multilingual Companion</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #ffe5ca 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            color: rgb(11, 11, 11);
+            text-align: center;
+            background-color: #ffe5ca;
+            font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            padding: 0px 0 10px 0; /* Increased padding for a more prominent header */
+            font-size: 1.5em; /* Increased font size for a more noticeable header */
+            font-weight: bold; /* Made text bold */
+        }
+        h1 {
+            margin: 0;
+            font-size: 2.5em;
+            text-align: center;
+        }
+        h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .feature-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        .feature-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #7f8c8d;
+        }
+    </style>
 </head>
-<body background="images/polyglidelogo.jpeg">
-    <div style="text-align:right;">
-        <h1>💖 Hello World!</h1>
-        <p>Welcome to your Electron application.</p>
-        <p>Press Command+I toggle popup</p>
-        <div id="receivedInput"></div>
-        <script src="renderer.js"></script>
+<body>
+    <header>
+        <img src="images/logo.png" alt="Umbrella App Logo" style="width: 100%;">
+        <p>Your Multilingual Companion for a Connected World</p>
+    </header>
+
+    <div class="container">
+        <section>
+            <h2>Glide over Languages</h2>
+            <p>PolyGlide is your all-in-one solution for breaking down language barriers and streamlining daily tasks. Whether you're a globe-trotting adventurer or a busy professional, we've got you covered!</p>
+        </section>
+
+        <section>
+            <h2>Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🗣️</div>
+                    <h3>DeepL Translator</h3>
+                    <p>Real-time translation for text, speech, and images. It's like having a universal translator in your pocket!</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💱</div>
+                    <h3>Companion</h3>
+                    <p>Convert and linguistic insights at your fingertips. Navigate new cultures like a pro!</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎙️</div>
+                    <h3>Voice Genie</h3>
+                    <p>Hands-free commands for when you're juggling tasks or languages. Just say the word!</p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>PolyGlide in Action</h2>
+            <ul>
+                <li>Seal international business deals with confidence</li>
+                <li>Navigate foreign streets like a local</li>
+                <li>Master your daily commute with hands-free efficiency</li>
+                <li>Break down barriers for diverse accessibility needs</li>
+                <li>Turn every conversation into a language learning opportunity</li>
+            </ul>
+        </section>
     </div>
-    
+
+    <footer>
+        <p>© 2024 PolyGlide - MHacks</p>
+    </footer>
 </body>
 </html>
