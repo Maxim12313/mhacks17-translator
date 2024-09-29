@@ -87,6 +87,7 @@
   <script>
     window.electron.receiveTranslation((translatedText) => {
       document.getElementById('translatedText').textContent = translatedText;
+      window.electron.cartesia(translatedText);
     });
   </script>
 </body>
