@@ -78,6 +78,24 @@ function togglePopup() {
   }
 }
 
+let transcriptionWindow;
+function createTranscriptionWindow() {
+  transcriptionWindow = new BrowserWindow({
+    width: 800,
+    height: 200,
+    transparent: true,
+    frame: false,
+    skipTaskbar: false,
+    alwaysOnTop: true,
+    resizable: false,
+    hasShadow: false,
+    webPreferences: {
+      preload: path.join(__dirname, "maxim-preload.js"),
+    },
+  });
+  transcriptionWindow.loadFile(path.join(__dirname, "transcription.html"));
+}
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 800,
@@ -145,9 +163,15 @@ function createPopup() {
 }
 
 app.whenReady().then(() => {
-  createWindow();
-  testMaxim();
-
+  // createWindow();
+  createTranscriptionWindow();
+  globalShortcut.register("CommandOrControl+U", () => {
+    if (transcriptionWindow.isVisible()) {
+      transcriptionWindow.hide();
+    } else {
+      transcriptionWindow.show();
+    }
+  });
   globalShortcut.register("CommandOrControl+I", togglePopup);
 });
 
@@ -162,8 +186,8 @@ app.on("will-quit", () => {
 ipcMain.on("submit-input", async (event, value) => {
   const translatedValue = await translator.translateText(value, null, "fr"); // Translate to French
   mainWindow.webContents.send("input-received", translatedValue);
-  if (translationWindow){
-    translationWindow.close();  
+  if (translationWindow) {
+    translationWindow.close();
   }
   createTranslationWindow(translatedValue.text); // Create a new window to show the translation
   // Focus on the popup window after submitting input and showing the translation window
@@ -193,12 +217,12 @@ function createTranslationWindow(translatedText) {
   // Send the translated text to the translation window
   translationWindow.webContents.on("did-finish-load", async () => {
     translationWindow.webContents.send("send-translation", translatedText);
-  
-  try {
-    await fetchAudio(translatedText);
-  } catch (error) {
-    console.error("Error fetching audio:", error);
-  }
+
+    try {
+      await fetchAudio(translatedText);
+    } catch (error) {
+      console.error("Error fetching audio:", error);
+    }
   });
 
   translationWindow.loadFile(path.join(__dirname, "translation.html"));
