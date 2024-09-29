@@ -1,7 +1,6 @@
 #ours
-
 package-lock.json
-
+*.wav
 
 # Logs
 logs
