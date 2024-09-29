@@ -60,7 +60,10 @@ function togglePopup() {
     // Close both windows if the popup is already open
     popupWindow.close();
     avatarWindow.close(); // Close avatar if popup is closed
-    translationWindow.close();
+    
+    if (translationWindow){
+      translationWindow.close();
+    }
     translationWindow = null;
     popupWindow = null;
     avatarWindow = null;
@@ -117,6 +120,7 @@ function createPopup() {
     alwaysOnTop: true,
     resizable: false,
     minimizable: false,
+    movable: true,
     maximizable: false,
     fullscreenable: false,
     webPreferences: {
