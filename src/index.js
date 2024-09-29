@@ -17,7 +17,7 @@ let mainWindow;
 let popupWindow;
 let avatarWindow;
 let settingsWindow;
-let selectedLanguage;
+let selectedLanguage = 'en-US'; //default language
 
 function createSettingsWindow() {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
