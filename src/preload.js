@@ -8,5 +8,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   transcribe: async (input) =>
     await ipcRenderer.invoke("transcribe", { input }),
   sendTranscription: (transcription) => 
-    ipcRenderer.send("send-transcription", transcription), // New method
+    ipcRenderer.send("send-transcription", transcription),
+  toggleSettings: () => ipcRenderer.send('toggle-settings'),
+  changeLanguage: (language) => ipcRenderer.send('change-language', language),
 });

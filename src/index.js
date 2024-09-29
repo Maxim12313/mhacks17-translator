@@ -16,14 +16,50 @@ const { getWaveBlob } = require("webm-to-wav-converter");
 let mainWindow;
 let popupWindow;
 let avatarWindow;
+let settingsWindow;
+let selectedLanguage;
+
+function createSettingsWindow() {
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+
+  settingsWindow = new BrowserWindow({
+    width: 200, // 200
+    height: 200, // 200
+    transparent: false,
+    frame: false,
+    skipTaskbar: false,
+    alwaysOnTop: true,
+    resizable: false,
+    hasShadow: false,
+    webPreferences: {
+      preload: path.join(__dirname, "preload.js"),
+      nodeIntegration: true,
+      contextIsolation: true,
+    },
+  });
+
+  // Set the overlay position to bottom-right corner
+  settingsWindow.setBounds({
+    x: width - 220, 
+    y: (height / 2) - 50,
+    width: 200, // 200
+    height: 200, // 200
+  });
+
+  settingsWindow.loadFile("src/settings.html");
+
+  settingsWindow.on("closed", () => {
+    settingsWindow = null;
+  });
+}
 let translationWindow;
 
 function createAvatarWindow() {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
 
   avatarWindow = new BrowserWindow({
-    width: 200,
-    height: 200,
+    width: 200, // 200
+    height: 200, // 200
     transparent: true,
     frame: false,
     skipTaskbar: false,
@@ -33,19 +69,19 @@ function createAvatarWindow() {
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: true,
-      contextIsolation: false,
+      contextIsolation: true,
     },
   });
 
-  avatarWindow.setIgnoreMouseEvents(true);
+  // avatarWindow.setIgnoreMouseEvents(true);
   avatarWindow.setMovable(true);
 
   // Set the overlay position to bottom-right corner
   avatarWindow.setBounds({
-    x: width - 220, // Adjusted for the width of the avatar
-    y: height - 220, // Adjusted for the height of the avatar
-    width: 200,
-    height: 200,
+    x: width - 220, // Adjusted for the width of the avatar 220
+    y: height - 220, // Adjusted for the height of the avatar 220
+    width: 200, // 200
+    height: 200, // 200
   });
 
   avatarWindow.loadFile("src/avatar.html");
@@ -224,7 +260,7 @@ async function createTranslationWindow(translatedText) {
   const translatedOutput = await translator.translateText(
     translatedText,
     null,
-    "fr",
+    selectedLanguage,
   ); // Translate to French
 
   // Send the translated text to the translation window
@@ -250,6 +286,21 @@ ipcMain.on("send-transcription", async (event, transcription) => {
 ipcMain.on("close-popup", () => {
   if (popupWindow) popupWindow.close();
   if (avatarWindow) avatarWindow.close();
+});
+
+ipcMain.on("change-language", (event, language) => {
+  selectedLanguage = language;
+  console.log(language);
+});
+
+ipcMain.on('toggle-settings', () => {
+  if (settingsWindow) {
+    settingsWindow.close();
+    settingsWindow = null;
+  }
+  else {
+    createSettingsWindow();
+  }
 });
 
 const authkey = "9e6ec4bd-b318-4768-b361-0784175a62d4:fx";
