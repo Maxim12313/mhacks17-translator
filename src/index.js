@@ -1,9 +1,9 @@
-const { app, BrowserWindow, globalShortcut, ipcMain, screen } = require('electron');
+const { app, BrowserWindow, globalShortcut, ipcMain, screen, clipbord } = require('electron');
 const path = require("path");
 const deepl = require("deepl-node");
-const { clipboard } = require("electron");
 const toggleBind = "CommandOrControl+I";
 const { create } = require("domain");
+const fetchAudio = require('./fetchAudio');
 
 let mainWindow;
 let popupWindow;
@@ -70,6 +70,8 @@ function createWindow() {
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
+      contextIsolation: true,
+      nodeIntegration: false,
     },
   });
 
@@ -91,7 +93,8 @@ function testMaxim() {
 function createPopup() {
   const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize;
   const popupWidth = 600;
-  const popupHeight = 60;
+  const popupHeight = 500;
+  // const popupHeight = 60;
 
   popupWindow = new BrowserWindow({
     width: popupWidth,
@@ -107,6 +110,8 @@ function createPopup() {
     fullscreenable: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: false,
+      contextIsolation: true,
     },
   });
 
@@ -128,14 +133,8 @@ app.whenReady().then(() => {
   createWindow();
   testMaxim();
 
-  globalShortcut.register(toggleBind, togglePopup);
-
-  // app.on("activate", () => {
-  //   if (BrowserWindow.getAllWindows().length === 0) {
-  //     createWindow();
-  //   }
-  // });
-});
+  globalShortcut.register('CommandOrControl+I', togglePopup);
+}); 
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
@@ -157,6 +156,19 @@ ipcMain.on("close-popup", () => {
 
 const authkey = "9e6ec4bd-b318-4768-b361-0784175a62d4:fx";
 const translator = new deepl.Translator(authkey);
+
+ipcMain.handle("popup-submitted", async (event, inputValue) => {
+  console.log("sent");
+  try {
+    console.log('try');
+    await fetchAudio(inputValue);
+    event.sender.send('audio-generated');
+  } catch (error) {
+    console.error("Error fetching audio:", error);
+    event.sender.send("audio-error", error.message);
+  }
+});
+
 
 ipcMain.handle("translate-to", async (event, { input, language }) => {
   const usage = await translator.getUsage();
