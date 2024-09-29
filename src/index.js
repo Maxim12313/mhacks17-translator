@@ -60,8 +60,8 @@ function togglePopup() {
     // Close both windows if the popup is already open
     popupWindow.close();
     avatarWindow.close(); // Close avatar if popup is closed
-    
-    if (translationWindow){
+
+    if (translationWindow) {
       translationWindow.close();
     }
     translationWindow = null;
@@ -246,10 +246,58 @@ ipcMain.handle("transcribe", async (event, { input }) => {
     const transcription = response.results
       .map((result) => result.alternatives[0].transcript)
       .join("\n");
-    console.log("Transcription:", transcription);
     return transcription;
   } catch (error) {
     console.error("Error:", error);
     return error;
   }
 });
+
+function handleStreamTranscription() {
+  const request = {
+    config: {
+      sampleRateHertz: 8000,
+      encoding: "WEBM_OPUS",
+      languageCode: "en-US",
+      enableAutomaticPunctuation: true,
+    },
+    interimResults: true, // Get interim results for streaming
+  };
+
+  const STREAMING_LIMIT = 290000;
+  let transcription;
+  let recognizeStream = null;
+  let nextId;
+  function startStream() {
+    recognizeStream = client
+      .streamingRecognize(request)
+      .on("error", console.error)
+      .on("data", (data) => {
+        if (data.results[0] && data.results[0].alternatives[0]) {
+          transcription = data.results[0].alternatives[0].transcript;
+        } else {
+          console.log("No transcription result");
+        }
+      });
+
+    // Schedule the stream to restart before the 5-minute limit
+    nextId = setTimeout(startStream, STREAMING_LIMIT);
+  }
+
+  ipcMain.handle("stream-transcribe", async (event, { base64 }) => {
+    if (!recognizeStream) startStream();
+    const buffer = Buffer.from(base64, "base64");
+    recognizeStream.write(buffer);
+    return transcription;
+  });
+
+  ipcMain.on("stop-streaming", () => {
+    console.log("stopped");
+    if (recognizeStream) {
+      recognizeStream.end();
+    }
+    clearTimeout(nextId);
+    recognizeStream = null;
+  });
+}
+handleStreamTranscription();
