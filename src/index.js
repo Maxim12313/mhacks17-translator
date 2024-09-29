@@ -57,13 +57,14 @@ function createAvatarWindow() {
 
 function togglePopup() {
   if (popupWindow) {
-    // Close both windows if the popup is already open
+    // Close all windows if the popup is already open
     popupWindow.close();
     avatarWindow.close(); // Close avatar if popup is closed
-
+    
     if (translationWindow) {
       translationWindow.close();
     }
+
     translationWindow = null;
     popupWindow = null;
     avatarWindow = null;
@@ -160,19 +161,19 @@ app.on("will-quit", () => {
 });
 
 ipcMain.on("submit-input", async (event, value) => {
-  const translatedValue = await translator.translateText(value, null, "fr"); // Translate to French
-  mainWindow.webContents.send("input-received", translatedValue);
+  // const translatedValue = await translator.translateText(value, null, "fr"); // Translate to French
+  // mainWindow.webContents.send("input-received", translatedValue);
   if (translationWindow){
     translationWindow.close();  
   }
-  createTranslationWindow(translatedValue.text); // Create a new window to show the translation
+  createTranslationWindow(value); // Create a new window to show the translation
   // Focus on the popup window after submitting input and showing the translation window
   if (popupWindow) {
     popupWindow.focus();
   }
 });
 
-function createTranslationWindow(translatedText) {
+async function createTranslationWindow(translatedText) {
   translationWindow = new BrowserWindow({
     width: 400,
     height: 300,
@@ -190,22 +191,21 @@ function createTranslationWindow(translatedText) {
     },
   });
 
+  const translatedOutput = await translator.translateText(translatedText, null, "fr"); // Translate to French
+
   // Send the translated text to the translation window
   translationWindow.webContents.on("did-finish-load", async () => {
-    translationWindow.webContents.send("send-translation", translatedText);
-  
-  try {
-    await fetchAudio(translatedText);
-  } catch (error) {
-    console.error("Error fetching audio:", error);
-  }
+    translationWindow.webContents.send("send-translation", translatedOutput.text);
   });
 
   translationWindow.loadFile(path.join(__dirname, "translation.html"));
 }
 
-ipcMain.on("send-transcription", (event, transcription) => {
+ipcMain.on("send-transcription", async (event, transcription) => {
   // Ensure transcription has the correct structure
+  if(translationWindow){
+    translationWindow.close();
+  }
 
   createTranslationWindow(transcription);
 });
@@ -218,15 +218,15 @@ ipcMain.on("close-popup", () => {
 const authkey = "9e6ec4bd-b318-4768-b361-0784175a62d4:fx";
 const translator = new deepl.Translator(authkey);
 
-// ipcMain.handle("tts-audio", async (event, inputValue) => {
-//   try {
-//     await fetchAudio(inputValue);
-//     event.sender.send("audio-generated");
-//   } catch (error) {
-//     console.error("Error fetching audio:", error);
-//     event.sender.send("audio-error", error.message);
-//   }
-// });
+ipcMain.handle("tts-audio", async (event, inputValue) => {
+  try {
+    await fetchAudio(inputValue);
+    event.sender.send("audio-generated");
+  } catch (error) {
+    console.error("Error fetching audio:", error);
+    event.sender.send("audio-error", error.message);
+  }
+});
 
 ipcMain.handle("translate-to", async (event, { input, language }) => {
   const usage = await translator.getUsage();
