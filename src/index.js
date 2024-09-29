@@ -16,6 +16,7 @@ const { getWaveBlob } = require("webm-to-wav-converter");
 let mainWindow;
 let popupWindow;
 let avatarWindow;
+let translationWindow;
 
 function createAvatarWindow() {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
@@ -59,6 +60,8 @@ function togglePopup() {
     // Close both windows if the popup is already open
     popupWindow.close();
     avatarWindow.close(); // Close avatar if popup is closed
+    translationWindow.close();
+    translationWindow = null;
     popupWindow = null;
     avatarWindow = null;
   } else {
@@ -152,10 +155,38 @@ app.on("will-quit", () => {
   globalShortcut.unregisterAll();
 });
 
-ipcMain.on("submit-input", (event, value) => {
-  mainWindow.webContents.send("input-received", value);
-  if (popupWindow) popupWindow.close();
+ipcMain.on("submit-input", async (event, value) => {
+  const translatedValue = await translator.translateText(value, null, 'fr'); // Translate to French
+  mainWindow.webContents.send("input-received", translatedValue);
+  createTranslationWindow(translatedValue); // Create a new window to show the translation
 });
+
+function createTranslationWindow(translatedText) {
+  translationWindow = new BrowserWindow({
+      width: 400,
+      height: 300,
+      frame: false,
+      x: 1000,
+      y: 500,
+      transparent: true,      
+      minimizable: false,
+      maximizable: false,
+      fullscreenable: false,      
+      webPreferences: {
+          preload: path.join(__dirname, 'translation-preload.js'),
+          contextIsolation: true,
+          enableRemoteModule: false,
+      },
+  });
+
+  // Send the translated text to the translation window
+  translationWindow.webContents.on('did-finish-load', () => {
+    translationWindow.webContents.send('send-translation', translatedText.text);
+  });
+
+  translationWindow.loadFile(path.join(__dirname, 'translation.html'));
+
+}
 
 ipcMain.on("close-popup", () => {
   if (popupWindow) popupWindow.close();

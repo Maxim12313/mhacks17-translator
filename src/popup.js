@@ -8,6 +8,7 @@ popupInput.addEventListener('keydown', (event) => {
         if (inputValue) {
             console.log(inputValue);
             window.electronAPI.cartesia(inputValue);
+            window.electronAPI.submitInput(inputValue);
             popupInput.value = '';
         }
     }
