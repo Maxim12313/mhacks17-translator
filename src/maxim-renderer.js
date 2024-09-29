@@ -80,6 +80,8 @@ function recordHandler() {
 
       // res is the transcription
       const res = await window.maxim.transcribe(base64);
+      console.log(res);
+      if (res == undefined) res = "";
       transcribeElement.innerText = res;
     };
   };

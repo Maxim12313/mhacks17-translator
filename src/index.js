@@ -40,8 +40,8 @@ function createSettingsWindow() {
 
   // Set the overlay position to bottom-right corner
   settingsWindow.setBounds({
-    x: width - 220, 
-    y: (height / 2) - 50,
+    x: width - 220,
+    y: height / 2 - 50,
     width: 200, // 200
     height: 200, // 200
   });
@@ -120,7 +120,6 @@ function createTranscriptionWindow() {
   transcriptionWindow = new BrowserWindow({
     width: 800,
     height: 200,
-    // height: 600,
     transparent: true,
     frame: false,
     skipTaskbar: false,
@@ -293,12 +292,11 @@ ipcMain.on("change-language", (event, language) => {
   console.log(language);
 });
 
-ipcMain.on('toggle-settings', () => {
+ipcMain.on("toggle-settings", () => {
   if (settingsWindow) {
     settingsWindow.close();
     settingsWindow = null;
-  }
-  else {
+  } else {
     createSettingsWindow();
   }
 });
