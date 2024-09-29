@@ -20,10 +20,29 @@
             box-shadow: 0 2px 10px rgba(146, 146, 146, 0.1);
             outline: none;
         }
+        #record {
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 50%;
+            background-color: rgba(217, 217, 217, 0.8);
+            box-shadow: 0 2px 10px rgba(146, 146, 146, 0.1);
+            outline: none;
+            position: absolute;
+            right: 0;
+            top: 0;
+            background-image: url('images/mic.png');
+            background-size: cover;
+            transition: background-color 0.3s ease;
+        }
+        #record:hover {
+            background-color: rgba(121, 121, 121, 0.9);
+        }
     </style>
 </head>
 <body>
     <input type="text" id="popupInput" placeholder="Type your message...">
+    <button id="record"></button>
     <script src="popup.js"></script>
 </body>
 </html>

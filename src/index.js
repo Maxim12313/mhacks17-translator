@@ -11,18 +11,20 @@ const deepl = require("deepl-node");
 const toggleBind = "CommandOrControl+I";
 const { create } = require("domain");
 const fetchAudio = require("./fetchAudio");
+const { getWaveBlob } = require("webm-to-wav-converter");
 
 let mainWindow;
 let popupWindow;
 let avatarWindow;
 let settingsWindow;
+let selectedLanguage;
 
 function createSettingsWindow() {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
 
   settingsWindow = new BrowserWindow({
-    width: 200,
-    height: 200,
+    width: 200, // 200
+    height: 200, // 200
     transparent: false,
     frame: false,
     skipTaskbar: false,
@@ -32,7 +34,7 @@ function createSettingsWindow() {
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: true,
-      contextIsolation: false,
+      contextIsolation: true,
     },
   });
 
@@ -40,8 +42,8 @@ function createSettingsWindow() {
   settingsWindow.setBounds({
     x: width - 220, 
     y: (height / 2) - 50,
-    width: 200,
-    height: 200,
+    width: 200, // 200
+    height: 200, // 200
   });
 
   settingsWindow.loadFile("src/settings.html");
@@ -50,13 +52,14 @@ function createSettingsWindow() {
     settingsWindow = null;
   });
 }
+let translationWindow;
 
 function createAvatarWindow() {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
 
   avatarWindow = new BrowserWindow({
-    width: 500, // 200
-    height: 500, // 200
+    width: 200, // 200
+    height: 200, // 200
     transparent: true,
     frame: false,
     skipTaskbar: false,
@@ -66,7 +69,7 @@ function createAvatarWindow() {
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: true,
-      contextIsolation: false,
+      contextIsolation: true,
     },
   });
 
@@ -75,10 +78,10 @@ function createAvatarWindow() {
 
   // Set the overlay position to bottom-right corner
   avatarWindow.setBounds({
-    x: width - 700, // Adjusted for the width of the avatar 220
-    y: height - 700, // Adjusted for the height of the avatar 220
-    width: 500, // 200
-    height: 500, // 200
+    x: width - 220, // Adjusted for the width of the avatar 220
+    y: height - 220, // Adjusted for the height of the avatar 220
+    width: 200, // 200
+    height: 200, // 200
   });
 
   avatarWindow.loadFile("src/avatar.html");
@@ -90,21 +93,44 @@ function createAvatarWindow() {
 
 function togglePopup() {
   if (popupWindow) {
-    // Close both windows if the popup is already open
+    // Close all windows if the popup is already open
     popupWindow.close();
     avatarWindow.close(); // Close avatar if popup is closed
+
+    if (translationWindow) {
+      translationWindow.close();
+    }
+
+    translationWindow = null;
     popupWindow = null;
     avatarWindow = null;
   } else {
     // Create both windows if they are not open
     createAvatarWindow();
     createPopup();
-    createSettingsWindow();
 
     // Ensure both windows stay on top
     avatarWindow.setAlwaysOnTop(true);
     popupWindow.setAlwaysOnTop(true);
   }
+}
+
+let transcriptionWindow;
+function createTranscriptionWindow() {
+  transcriptionWindow = new BrowserWindow({
+    width: 800,
+    height: 200,
+    transparent: true,
+    frame: false,
+    skipTaskbar: false,
+    alwaysOnTop: true,
+    resizable: false,
+    hasShadow: false,
+    webPreferences: {
+      preload: path.join(__dirname, "maxim-preload.js"),
+    },
+  });
+  transcriptionWindow.loadFile(path.join(__dirname, "transcription.html"));
 }
 
 function createWindow() {
@@ -149,6 +175,7 @@ function createPopup() {
     alwaysOnTop: true,
     resizable: false,
     minimizable: false,
+    movable: true,
     maximizable: false,
     fullscreenable: false,
     webPreferences: {
@@ -173,9 +200,15 @@ function createPopup() {
 }
 
 app.whenReady().then(() => {
-  createWindow();
-  testMaxim();
-
+  // createWindow();
+  createTranscriptionWindow();
+  globalShortcut.register("CommandOrControl+U", () => {
+    if (transcriptionWindow.isVisible()) {
+      transcriptionWindow.hide();
+    } else {
+      transcriptionWindow.show();
+    }
+  });
   globalShortcut.register("CommandOrControl+I", togglePopup);
 });
 
@@ -187,14 +220,71 @@ app.on("will-quit", () => {
   globalShortcut.unregisterAll();
 });
 
-ipcMain.on("submit-input", (event, value) => {
-  mainWindow.webContents.send("input-received", value);
-  if (popupWindow) popupWindow.close();
+ipcMain.on("submit-input", async (event, value) => {
+  // const translatedValue = await translator.translateText(value, null, "fr"); // Translate to French
+  // mainWindow.webContents.send("input-received", translatedValue);
+  if (translationWindow) {
+    translationWindow.close();
+  }
+  createTranslationWindow(value); // Create a new window to show the translation
+  // Focus on the popup window after submitting input and showing the translation window
+  if (popupWindow) {
+    popupWindow.focus();
+  }
+});
+
+async function createTranslationWindow(translatedText) {
+  translationWindow = new BrowserWindow({
+    width: 400,
+    height: 300,
+    frame: false,
+    x: 1000,
+    y: 500,
+    transparent: true,
+    minimizable: false,
+    maximizable: false,
+    fullscreenable: false,
+    webPreferences: {
+      preload: path.join(__dirname, "translation-preload.js"),
+      contextIsolation: true,
+      enableRemoteModule: false,
+    },
+  });
+
+  const translatedOutput = await translator.translateText(
+    translatedText,
+    null,
+    selectedLanguage,
+  ); // Translate to French
+
+  // Send the translated text to the translation window
+  translationWindow.webContents.on("did-finish-load", async () => {
+    translationWindow.webContents.send(
+      "send-translation",
+      translatedOutput.text,
+    );
+  });
+
+  translationWindow.loadFile(path.join(__dirname, "translation.html"));
+}
+
+ipcMain.on("send-transcription", async (event, transcription) => {
+  // Ensure transcription has the correct structure
+  if (translationWindow) {
+    translationWindow.close();
+  }
+
+  createTranslationWindow(transcription);
 });
 
 ipcMain.on("close-popup", () => {
   if (popupWindow) popupWindow.close();
   if (avatarWindow) avatarWindow.close();
+});
+
+ipcMain.on("change-language", (event, language) => {
+  selectedLanguage = language;
+  console.log(language);
 });
 
 ipcMain.on('toggle-settings', () => {
@@ -210,7 +300,7 @@ ipcMain.on('toggle-settings', () => {
 const authkey = "9e6ec4bd-b318-4768-b361-0784175a62d4:fx";
 const translator = new deepl.Translator(authkey);
 
-ipcMain.handle("popup-submitted", async (event, inputValue) => {
+ipcMain.handle("tts-audio", async (event, inputValue) => {
   try {
     await fetchAudio(inputValue);
     event.sender.send("audio-generated");
@@ -236,18 +326,21 @@ ipcMain.handle("translate-to", async (event, { input, language }) => {
 });
 
 const speech = require("@google-cloud/speech");
+const { log } = require("console");
 const client = new speech.SpeechClient();
-ipcMain.handle("transcribe", async (event, { data }) => {
-  console.log("data was " + data);
+ipcMain.handle("transcribe", async (event, { input }) => {
+  const audio = {
+    content: input,
+  };
+
+  const config = {
+    encoding: "WEBM_OPUS",
+    languageCode: "en-US",
+  };
+
   const request = {
-    audio: {
-      content: data,
-    },
-    config: {
-      encoding: "LINEAR16",
-      sampleRateHertz: 16000,
-      languageCode: "en-US",
-    },
+    audio,
+    config,
   };
 
   try {
@@ -255,9 +348,58 @@ ipcMain.handle("transcribe", async (event, { data }) => {
     const transcription = response.results
       .map((result) => result.alternatives[0].transcript)
       .join("\n");
-    console.log("Transcription:", transcription);
     return transcription;
   } catch (error) {
     console.error("Error:", error);
+    return error;
   }
 });
+
+function handleStreamTranscription() {
+  const request = {
+    config: {
+      sampleRateHertz: 8000,
+      encoding: "WEBM_OPUS",
+      languageCode: "en-US",
+      enableAutomaticPunctuation: true,
+    },
+    interimResults: true, // Get interim results for streaming
+  };
+
+  const STREAMING_LIMIT = 290000;
+  let transcription;
+  let recognizeStream = null;
+  let nextId;
+  function startStream() {
+    recognizeStream = client
+      .streamingRecognize(request)
+      .on("error", console.error)
+      .on("data", (data) => {
+        if (data.results[0] && data.results[0].alternatives[0]) {
+          transcription = data.results[0].alternatives[0].transcript;
+        } else {
+          console.log("No transcription result");
+        }
+      });
+
+    // Schedule the stream to restart before the 5-minute limit
+    nextId = setTimeout(startStream, STREAMING_LIMIT);
+  }
+
+  ipcMain.handle("stream-transcribe", async (event, { base64 }) => {
+    if (!recognizeStream) startStream();
+    const buffer = Buffer.from(base64, "base64");
+    recognizeStream.write(buffer);
+    return transcription;
+  });
+
+  ipcMain.on("stop-streaming", () => {
+    console.log("stopped");
+    if (recognizeStream) {
+      recognizeStream.end();
+    }
+    clearTimeout(nextId);
+    recognizeStream = null;
+  });
+}
+handleStreamTranscription();

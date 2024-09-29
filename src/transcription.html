@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Transcription</title>
+    <style>
+      body {
+        -webkit-app-region: drag; /* Make this area draggable */
+        margin: 0;
+        padding: 0;
+        background-color: transparent;
+        overflow: hidden;
+      }
+
+      #transcription {
+        line-height: 35px;
+        width: calc(100% - 40px);
+        min-height: 4ch;
+        border: none;
+        border-radius: 25px;
+        padding: 8px 20px;
+        font-size: 20px;
+        background-color: rgba(217, 217, 217, 0.8);
+        box-shadow: 0 2px 10px rgba(146, 146, 146, 0.1);
+        display: flex;
+        justify-content: center;
+        outline: none;
+      }
+    </style>
+  </head>
+  <body>
+    <p id="transcription"></p>
+  </body>
+  <script src="transcriber-renderer.js"></script>
+</html>

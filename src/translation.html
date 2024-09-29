@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Translated Text</title>
+  <style>
+    body {
+      height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      font: 2vw system-ui;
+      background-color: transparent; /* $color-yellow */
+    }
+
+    body p {
+      transform: translatey(0px);
+      animation: float 5s ease-in-out infinite;
+      text-align: center;
+      text-transform: uppercase;
+      font-weight: bold;
+      letter-spacing: 1px;
+      font-size: 15px;
+      color: #774f38; /* $color-brown */
+      background-color: #efeada; /* $color-beige */
+      padding: 30px;
+      border-radius: 11px;
+      position: absolute;
+      box-shadow: 10px 10px #9ca8de; /* $color-blue */
+      border: 1px solid #c8c8a9; /* $color-green */
+    }
+    body p:after {
+      transform: translatey(0px);
+      animation: float2 5s ease-in-out infinite;
+      content: ".";
+      font-weight: bold;
+      -webkit-text-stroke: 0.5px #efeada; /* $color-green */
+      -webkit-text-fill-color: #efeada; /* $color-beige */
+      border: 1px solid #efeada; /* $color-green */
+      text-shadow: 12px 12px #9ca8de; /* $color-blue */
+      text-align: left;
+      font-size: 55px;
+      width: 55px;
+      height: 11px;
+      line-height: 30px;
+      border-radius: 11px;
+      background-color: #efeada; /* $color-beige */
+      position: absolute;
+      display: block;
+      bottom: -30px;
+      left: 100px; /* Shifted to the right by 100 pixels */
+      box-shadow: 12px 12px #9ca8de; /* $color-blue */
+      z-index: -2;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translatey(0px);
+      }
+      50% {
+        transform: translatey(-15px);
+      }
+      100% {
+        transform: translatey(0px);
+      }
+    }
+
+    @keyframes float2 {
+      0% {
+        line-height: 30px;
+        transform: translatey(0px);
+      }
+      55% {
+        transform: translatey(-15px);
+      }
+      60% {
+        line-height: 10px;
+      }
+      100% {
+        line-height: 30px;
+        transform: translatey(0px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <p id="translatedText"></p>
+  <script>
+    window.electron.receiveTranslation((translatedText) => {
+      document.getElementById('translatedText').textContent = translatedText;
+      window.electron.cartesia(translatedText);
+    });
+  </script>
+</body>
+</html>

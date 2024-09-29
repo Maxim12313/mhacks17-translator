@@ -1,6 +1,9 @@
 #ours
-
 package-lock.json
+*.wav
+
+# key
+mhacks-translator-881949bb5fdb.json
 
 
 # Logs
@@ -95,3 +98,6 @@ typings/
 
 # Electron-Forge
 out/
+
+
+!.env
