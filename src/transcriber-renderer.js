@@ -32,7 +32,6 @@ async function recordComputerHandler() {
       console.log("missing blackhole");
       return;
     }
-    console.log("so id is " + deviceId);
 
     const media = await navigator.mediaDevices.getUserMedia({
       audio: {
@@ -45,7 +44,14 @@ async function recordComputerHandler() {
     recorder.ondataavailable = async (event) => {
       if (event.data.size == 0) return;
       const base64 = await convertBase64(event.data);
-      textElement.innerText = await window.electron.streamTranscribe(base64);
+      const english = await window.electron.streamTranscribe(base64);
+      if (english === undefined) {
+        textElement.innerText = "";
+        return;
+      }
+      const lang = "fr";
+      const translated = await window.electron.translateTo(english, lang);
+      textElement.innerText = translated.text;
     };
 
     recorder.start(250);
