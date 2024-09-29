@@ -165,7 +165,7 @@ ipcMain.on("submit-input", async (event, value) => {
   if (translationWindow){
     translationWindow.close();  
   }
-  createTranslationWindow(translatedValue); // Create a new window to show the translation
+  createTranslationWindow(translatedValue.text); // Create a new window to show the translation
   // Focus on the popup window after submitting input and showing the translation window
   if (popupWindow) {
     popupWindow.focus();
@@ -191,12 +191,24 @@ function createTranslationWindow(translatedText) {
   });
 
   // Send the translated text to the translation window
-  translationWindow.webContents.on("did-finish-load", () => {
-    translationWindow.webContents.send("send-translation", translatedText.text);
+  translationWindow.webContents.on("did-finish-load", async () => {
+    translationWindow.webContents.send("send-translation", translatedText);
+  
+  try {
+    await fetchAudio(translatedText);
+  } catch (error) {
+    console.error("Error fetching audio:", error);
+  }
   });
 
   translationWindow.loadFile(path.join(__dirname, "translation.html"));
 }
+
+ipcMain.on("send-transcription", (event, transcription) => {
+  // Ensure transcription has the correct structure
+
+  createTranslationWindow(transcription);
+});
 
 ipcMain.on("close-popup", () => {
   if (popupWindow) popupWindow.close();
@@ -206,15 +218,15 @@ ipcMain.on("close-popup", () => {
 const authkey = "9e6ec4bd-b318-4768-b361-0784175a62d4:fx";
 const translator = new deepl.Translator(authkey);
 
-ipcMain.handle("popup-submitted", async (event, inputValue) => {
-  try {
-    await fetchAudio(inputValue);
-    event.sender.send("audio-generated");
-  } catch (error) {
-    console.error("Error fetching audio:", error);
-    event.sender.send("audio-error", error.message);
-  }
-});
+// ipcMain.handle("tts-audio", async (event, inputValue) => {
+//   try {
+//     await fetchAudio(inputValue);
+//     event.sender.send("audio-generated");
+//   } catch (error) {
+//     console.error("Error fetching audio:", error);
+//     event.sender.send("audio-error", error.message);
+//   }
+// });
 
 ipcMain.handle("translate-to", async (event, { input, language }) => {
   const usage = await translator.getUsage();
@@ -232,6 +244,7 @@ ipcMain.handle("translate-to", async (event, { input, language }) => {
 });
 
 const speech = require("@google-cloud/speech");
+const { log } = require("console");
 const client = new speech.SpeechClient();
 ipcMain.handle("transcribe", async (event, { input }) => {
   const audio = {

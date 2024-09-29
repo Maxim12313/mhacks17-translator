@@ -41,7 +41,23 @@ function recordHandler() {
       const media = await navigator.mediaDevices.getUserMedia({ audio: true });
       recorder = new MediaRecorder(media, { mimeType: "audio/webm" });
 
+      // Move the onstop event handler here
       recorder.ondataavailable = (event) => chunks.push(event.data);
+      recorder.onstop = async (event) => { // {{ edit_1 }}
+        const blob = new Blob(chunks, { type: "audio/webm" });
+        // const audioURL = window.URL.createObjectURL(blob);
+        // audioElement.src = audioURL; // This line may cause an error if audioElement is null
+        const base64 = await convertBase64(blob);
+
+        // res is the transcription
+        const res = await window.electronAPI.transcribe(base64);
+
+        // Send transcription to translation window
+        window.electronAPI.sendTranscription(res); 
+
+        chunks = []; // Reset chunks for the next recording
+      }; // {{ edit_1 }}
+
       recorder.start();
       live = true;
       console.log("recording");
@@ -53,19 +69,8 @@ function recordHandler() {
       recordButton.style.backgroundColor = ""; // Reset the button color when not recording
     }
   };
-
-  recorder.onstop = async (event) => {
-    const blob = new Blob(chunks, { type: "audio/webm" });
-    const audioURL = window.URL.createObjectURL(blob);
-    audioElement.src = audioURL;
-    const base64 = await convertBase64(blob);
-
-    // res is the transcription
-    const res = await window.maxim.transcribe(base64);
-    transcribeElement.innerText = res;
-
-    chunks = []; // Reset chunks for the next recording
-  };
 }
-recordHandler();
+
+// Call recordHandler after DOM is fully loaded
+document.addEventListener("DOMContentLoaded", recordHandler);
 
