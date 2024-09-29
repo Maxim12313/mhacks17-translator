@@ -1,8 +1,11 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   margin: auto;
-  max-width: 38rem;
-  padding: 2rem;
+  max-width: 58rem;
+  padding: 8rem;
+  background-position: center;
+  background-size: auto;
+  background-repeat: no-repeat;
 }
 
 button {
