@@ -64,6 +64,8 @@ function createWindow() {
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
+      contextIsolation: true,
+      nodeIntegration: false,
     },
   });
 
@@ -85,7 +87,8 @@ function testMaxim() {
 function createPopup() {
   const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize;
   const popupWidth = 600;
-  const popupHeight = 60;
+  const popupHeight = 500;
+  // const popupHeight = 60;
 
   popupWindow = new BrowserWindow({
     width: popupWidth,
@@ -101,6 +104,8 @@ function createPopup() {
     fullscreenable: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: false,
+      contextIsolation: true,
     },
   });
 
@@ -146,24 +151,18 @@ ipcMain.on("close-popup", () => {
 const authkey = "9e6ec4bd-b318-4768-b361-0784175a62d4:fx";
 const translator = new deepl.Translator(authkey);
 
-ipcMain.handle("popup-enter-pressed", (event, inputValue) => {
+ipcMain.handle("popup-submitted", async (event, inputValue) => {
+  console.log("sent");
   try {
+    console.log('try');
     await fetchAudio(inputValue);
-    await new Promise((resolve, reject) => {
-      setTimeout(() => {
-        resolve();
-      }, 1000);
-    });
     event.sender.send('audio-generated');
-  } 
-  catch (error) {
+  } catch (error) {
     console.error("Error fetching audio:", error);
     event.sender.send("audio-error", error.message);
   }
+});
 
-  }
-
-})
 
 ipcMain.handle("translate-to", async (event, { input, language }) => {
   const usage = await translator.getUsage();
