@@ -29,8 +29,10 @@
   },
   "license": "MIT",
   "dependencies": {
-    "canvas": "^2.11.2",
+    "@google-cloud/speech": "^6.7.0",
     "deepl-node": "^1.14.0",
-    "electron-squirrel-startup": "^1.0.1"
+    "electron-squirrel-startup": "^1.0.1",
+    "fs": "^0.0.1-security",
+    "nodejs-whisper": "^0.1.18"
   }
 }

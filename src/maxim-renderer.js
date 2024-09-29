@@ -47,51 +47,53 @@ typingHandler();
 function recordHandler() {
   const recordButton = document.getElementById("record");
   const stopButton = document.getElementById("stop");
+  const audioElement = document.getElementById("audio");
 
   let live = false;
   let recorder;
-  const chunks = [];
+  let chunks = [];
+
+  function blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  async function transcribe(blob) {
+    try {
+      const converted = await blobToBase64(blob);
+      console.log("converted to client is " + converted);
+      const res = window.maxim.transcribe(converted);
+      console.log("result is " + res);
+    } catch (error) {
+      console.log("Error: " + error);
+    }
+  }
 
   recordButton.onclick = async () => {
-    if (recorder) {
-      if (live) {
-        recordButton.style.background = "white";
-        recorder.resume();
-      } else {
-        recordButton.style.background = "yellow";
-        recorder.pause;
-      }
-    }
+    const media = await navigator.mediaDevices.getUserMedia({ audio: true });
+    recorder = new MediaRecorder(media);
 
-    console.log("set");
-    const res = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-    });
+    recorder.start();
 
-    recorder = new MediaRecorder(res);
-    recorder.ondataavailable = () => {
+    recorder.ondataavailable = (event) => {
       chunks.push(event.data);
     };
 
-    recorder.onstop = () => {
+    recorder.onstop = (event) => {
       const blob = new Blob(chunks, { type: "audio/wav" });
-      console.log("blob is " + blob);
-      // For now, log the recorded audio size
-      const audioUrl = URL.createObjectURL(blob);
-      const audio = new Audio(audioUrl);
-      audio.play();
-      console.log("playing");
+      chunks = [];
+      const audioURL = window.URL.createObjectURL(blob);
+      audioElement.src = audioURL;
+      transcribe(blob);
     };
-    stopButton.style.visibility = "visible";
-    recordButton.style.background = "yellow";
-    live = !live;
   };
 
-  stopButton.onclick = () => {
+  stopButton.onclick = async () => {
     recorder.stop();
-    stopButton.style.visibility = "hidden";
-    recordButton.style.background = "white";
-    live = false;
   };
 }
 recordHandler();
