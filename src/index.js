@@ -24,8 +24,8 @@ function createSettingsWindow() {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
 
   settingsWindow = new BrowserWindow({
-    width: 200, // 200
-    height: 200, // 200
+    width: 150, // 200
+    height: 150, // 200
     transparent: false,
     frame: false,
     skipTaskbar: false,
@@ -41,8 +41,8 @@ function createSettingsWindow() {
 
   // Set the overlay position to bottom-right corner
   settingsWindow.setBounds({
-    x: width - 220,
-    y: height / 2 - 50,
+    x: width - 220, 
+    y: (height / 2) - 100, // Shifted down by 20 pixels
     width: 200, // 200
     height: 200, // 200
   });

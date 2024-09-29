@@ -3,44 +3,70 @@
 <head>
     <title>Settings</title>
     <style>
-        body {
+        @import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+
+        * {
             margin: 0;
             padding: 0;
-            background-color: rgba(217, 217, 217, 0.8);
+            box-sizing: border-box;
+            font-family: "Poppins", sans-serif;
+        }
+
+        body {
+            background-color: #c9c2ff;
+            background-image: linear-gradient(0deg, #bdbdbd 0%, #cfcfcf 100%);
             width: 100%;
-            height: 500px;
-            box-shadow: 0 2px 10px rgba(146, 146, 146, 0.1);
-            font-size: 16px;
+            height: 100%;
             overflow: hidden;
             outline: none;
             text-align: center;
         }
 
+        .container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        p {
+            color: #fff;
+            margin-bottom: 0.5rem;
+            font-size: 1.4rem;
+            text-align: center;
+        }
+
         #language-dropdown {
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            background-color: #f0f0f0;
-            border: 1px solid #ccc;
-            border-radius: 5px; /* Adjust the border radius as needed */
-            padding: 5px 10px;
-            cursor: pointer;
-            font-size: 14px;
             width: 100%;
+            outline: none;
+            border: 1px solid #fff;
+            padding: 1rem;
+            font-size: 1.1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 4px rgb(146 161 176 / 15%);
+            cursor: pointer;
+        }
+
+        #language-dropdown:focus,
+        #language-dropdown:hover {
+            outline: none;
+            border: 1px solid rgba(0, 0, 0, 0.329);
         }
     </style>
 </head>
 <body>
-    <p>Select a Language</p>
-    <select id="languageDropdown">
-        <option value="en-US" selected>English</option>
-        <option value="fr">French</option>
-        <option value="de">German</option>
-        <option value="es">Spanish</option>   
-        <option value="pt">Portuguese</option>
-        <option value="zh">Chinese</option>
-        <option value="ja">Japanese</option> 
-    </select>
+    <div class="container">
+        <p>Select a Language</p>
+        <select id="language-dropdown">
+            <option value="en-US" selected>English</option>
+            <option value="fr">French</option>
+            <option value="de">German</option>
+            <option value="es">Spanish</option>
+            <option value="pt">Portuguese</option>
+            <option value="zh">Chinese</option>
+            <option value="ja">Japanese</option>
+        </select>
+    </div>
     <script src="settings.js"></script>
 </body>
 </html>
