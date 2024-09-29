@@ -196,9 +196,7 @@ const authkey = "9e6ec4bd-b318-4768-b361-0784175a62d4:fx";
 const translator = new deepl.Translator(authkey);
 
 ipcMain.handle("popup-submitted", async (event, inputValue) => {
-  console.log("sent");
   try {
-    console.log("try");
     await fetchAudio(inputValue);
     event.sender.send("audio-generated");
   } catch (error) {
