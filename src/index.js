@@ -97,10 +97,10 @@ function createTranscriptionWindow() {
   transcriptionWindow.loadFile(path.join(__dirname, "transcription.html"));
 }
 
-function createWindow() {
+function createMainWindow() {
   mainWindow = new BrowserWindow({
     width: 800,
-    height: 600,
+    height: 550,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
@@ -164,7 +164,7 @@ function createPopup() {
 }
 
 app.whenReady().then(() => {
-  // createWindow();
+  createMainWindow();
   createTranscriptionWindow();
   globalShortcut.register("CommandOrControl+U", () => {
     if (transcriptionWindow.isVisible()) {
