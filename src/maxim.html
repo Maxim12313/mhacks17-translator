@@ -7,12 +7,18 @@
   </head>
   <body>
     <h1>Maxim Test</h1>
-    <input style="height: 100%" type="text" id="popupInput" placeholder="Type your message..." />
+    <input
+      style="height: 100%"
+      type="text"
+      id="popupInput"
+      placeholder="Type your message..."
+    />
     <p>Translated:<span id="translated"></span></p>
     <div>
       <audio id="audio" controls>Audio</audio>
       <button id="record">record</button>
       <button id="stop">stop</button>
+      <p>transcribed: <span id="transcribe"></span></p>
     </div>
     <script src="maxim-renderer.js"></script>
   </body>

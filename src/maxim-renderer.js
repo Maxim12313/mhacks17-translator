@@ -48,47 +48,37 @@ function recordHandler() {
   const recordButton = document.getElementById("record");
   const stopButton = document.getElementById("stop");
   const audioElement = document.getElementById("audio");
+  const transcribeElement = document.getElementById("transcribe");
 
   let live = false;
   let recorder;
   let chunks = [];
 
-  function blobToBase64(blob) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-  }
-
-  async function transcribe(blob) {
-    try {
-      const converted = await blobToBase64(blob);
-      console.log("converted to client is " + converted);
-      const res = window.maxim.transcribe(converted);
-      console.log("result is " + res);
-    } catch (error) {
-      console.log("Error: " + error);
+  async function convertBase64(blob) {
+    const buffer = await blob.arrayBuffer();
+    let binary = "";
+    let bytes = new Uint8Array(buffer);
+    let len = bytes.byteLength;
+    for (var i = 0; i < len; i++) {
+      binary += String.fromCharCode(bytes[i]);
     }
+    return window.btoa(binary);
   }
 
   recordButton.onclick = async () => {
     const media = await navigator.mediaDevices.getUserMedia({ audio: true });
-    recorder = new MediaRecorder(media);
+    recorder = new MediaRecorder(media, { mimeType: "audio/webm" });
 
+    recorder.ondataavailable = (event) => chunks.push(event.data);
     recorder.start();
 
-    recorder.ondataavailable = (event) => {
-      chunks.push(event.data);
-    };
-
-    recorder.onstop = (event) => {
-      const blob = new Blob(chunks, { type: "audio/wav" });
-      chunks = [];
+    recorder.onstop = async (event) => {
+      const blob = new Blob(chunks, { type: "audio/webm" });
       const audioURL = window.URL.createObjectURL(blob);
       audioElement.src = audioURL;
-      transcribe(blob);
+      const base64 = await convertBase64(blob);
+      const res = await window.maxim.transcribe(base64);
+      transcribeElement.innerText = res;
     };
   };
 
