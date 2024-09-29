@@ -93,8 +93,7 @@ function testMaxim() {
 function createPopup() {
   const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize;
   const popupWidth = 600;
-  const popupHeight = 500;
-  // const popupHeight = 60;
+  const popupHeight = 60;
 
   popupWindow = new BrowserWindow({
     width: popupWidth,
