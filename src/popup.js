@@ -1,8 +1,6 @@
 const popupInput = document.getElementById('popupInput');
 
 popupInput.addEventListener('keydown', (event) => {
-    console.log('CARTESIAN INITIATE');
-    
     if (event.key === 'Enter') {
         const inputValue = popupInput.value.trim();
         if (inputValue) {
@@ -12,6 +10,7 @@ popupInput.addEventListener('keydown', (event) => {
         }
     }
 });
+
 
 
 // Focus the input field when the window opens

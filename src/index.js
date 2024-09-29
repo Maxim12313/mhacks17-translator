@@ -15,13 +15,48 @@ const fetchAudio = require("./fetchAudio");
 let mainWindow;
 let popupWindow;
 let avatarWindow;
+let settingsWindow;
+
+function createSettingsWindow() {
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+
+  settingsWindow = new BrowserWindow({
+    width: 200,
+    height: 200,
+    transparent: false,
+    frame: false,
+    skipTaskbar: false,
+    alwaysOnTop: true,
+    resizable: false,
+    hasShadow: false,
+    webPreferences: {
+      preload: path.join(__dirname, "preload.js"),
+      nodeIntegration: true,
+      contextIsolation: false,
+    },
+  });
+
+  // Set the overlay position to bottom-right corner
+  settingsWindow.setBounds({
+    x: width - 220, 
+    y: (height / 2) - 50,
+    width: 200,
+    height: 200,
+  });
+
+  settingsWindow.loadFile("src/settings.html");
+
+  settingsWindow.on("closed", () => {
+    settingsWindow = null;
+  });
+}
 
 function createAvatarWindow() {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
 
   avatarWindow = new BrowserWindow({
-    width: 200,
-    height: 200,
+    width: 500, // 200
+    height: 500, // 200
     transparent: true,
     frame: false,
     skipTaskbar: false,
@@ -35,15 +70,15 @@ function createAvatarWindow() {
     },
   });
 
-  avatarWindow.setIgnoreMouseEvents(true);
+  // avatarWindow.setIgnoreMouseEvents(true);
   avatarWindow.setMovable(true);
 
   // Set the overlay position to bottom-right corner
   avatarWindow.setBounds({
-    x: width - 220, // Adjusted for the width of the avatar
-    y: height - 220, // Adjusted for the height of the avatar
-    width: 200,
-    height: 200,
+    x: width - 700, // Adjusted for the width of the avatar 220
+    y: height - 700, // Adjusted for the height of the avatar 220
+    width: 500, // 200
+    height: 500, // 200
   });
 
   avatarWindow.loadFile("src/avatar.html");
@@ -64,6 +99,7 @@ function togglePopup() {
     // Create both windows if they are not open
     createAvatarWindow();
     createPopup();
+    createSettingsWindow();
 
     // Ensure both windows stay on top
     avatarWindow.setAlwaysOnTop(true);
@@ -161,13 +197,21 @@ ipcMain.on("close-popup", () => {
   if (avatarWindow) avatarWindow.close();
 });
 
+ipcMain.on('toggle-settings', () => {
+  if (settingsWindow) {
+    settingsWindow.close();
+    settingsWindow = null;
+  }
+  else {
+    createSettingsWindow();
+  }
+});
+
 const authkey = "9e6ec4bd-b318-4768-b361-0784175a62d4:fx";
 const translator = new deepl.Translator(authkey);
 
 ipcMain.handle("popup-submitted", async (event, inputValue) => {
-  console.log("sent");
   try {
-    console.log("try");
     await fetchAudio(inputValue);
     event.sender.send("audio-generated");
   } catch (error) {
