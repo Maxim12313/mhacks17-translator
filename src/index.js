@@ -3,6 +3,7 @@ const path = require("path");
 const deepl = require("deepl-node");
 const toggleBind = "CommandOrControl+I";
 const { create } = require("domain");
+const fetchAudio = require('./fetchAudio');
 
 let mainWindow;
 let popupWindow;
@@ -144,6 +145,25 @@ ipcMain.on("close-popup", () => {
 
 const authkey = "9e6ec4bd-b318-4768-b361-0784175a62d4:fx";
 const translator = new deepl.Translator(authkey);
+
+ipcMain.handle("popup-enter-pressed", (event, inputValue) => {
+  try {
+    await fetchAudio(inputValue);
+    await new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve();
+      }, 1000);
+    });
+    event.sender.send('audio-generated');
+  } 
+  catch (error) {
+    console.error("Error fetching audio:", error);
+    event.sender.send("audio-error", error.message);
+  }
+
+  }
+
+})
 
 ipcMain.handle("translate-to", async (event, { input, language }) => {
   const usage = await translator.getUsage();
