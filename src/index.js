@@ -11,6 +11,7 @@ const deepl = require("deepl-node");
 const toggleBind = "CommandOrControl+I";
 const { create } = require("domain");
 const fetchAudio = require("./fetchAudio");
+const { getWaveBlob } = require("webm-to-wav-converter");
 
 let mainWindow;
 let popupWindow;
@@ -193,17 +194,19 @@ ipcMain.handle("translate-to", async (event, { input, language }) => {
 
 const speech = require("@google-cloud/speech");
 const client = new speech.SpeechClient();
-ipcMain.handle("transcribe", async (event, { data }) => {
-  console.log("data was " + data);
+ipcMain.handle("transcribe", async (event, { input }) => {
+  const audio = {
+    content: input,
+  };
+
+  const config = {
+    encoding: "WEBM_OPUS",
+    languageCode: "en-US",
+  };
+
   const request = {
-    audio: {
-      content: data,
-    },
-    config: {
-      encoding: "LINEAR16",
-      sampleRateHertz: 16000,
-      languageCode: "en-US",
-    },
+    audio,
+    config,
   };
 
   try {
@@ -215,5 +218,6 @@ ipcMain.handle("transcribe", async (event, { data }) => {
     return transcription;
   } catch (error) {
     console.error("Error:", error);
+    return error;
   }
 });
